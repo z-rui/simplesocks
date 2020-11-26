@@ -1,0 +1,17 @@
+# goreleaser.yml
+builds:
+  - main: ./cmd/ss-server/
+    id: "ss-server"
+    binary: ss-server
+    goos:
+      - linux
+      - darwin
+      - windows
+
+  - main: ./cmd/ss-client/
+    id: "ss-client"
+    binary: ss-client
+    goos:
+      - linux
+      - darwin
+      - windows
