@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/armon/go-socks5"
+	socks "github.com/fangdingjun/socks-go"
 	"github.com/z-rui/simplesocks"
 	"github.com/z-rui/simplesocks/common"
 )
@@ -19,7 +19,6 @@ var (
 
 func main() {
 	var err error
-	var socksServer *socks5.Server
 	flag.Parse()
 	if *listenAddr == "" {
 		flag.Usage()
@@ -29,12 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *dialAddr == "" {
-		socksServer, err = socks5.New(&socks5.Config{})
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 	common.ListenAndServe(*listenAddr, func(conn net.Conn) {
 		defer conn.Close()
 		in, err := simplesocks.ServerConn(conn, privateKey)
@@ -43,7 +36,9 @@ func main() {
 			return
 		}
 		if *dialAddr == "" {
-			err = socksServer.ServeConn(in)
+			var d net.Dialer
+			s := socks.Conn{Conn: in, Dial: d.Dial}
+			s.Serve()
 		} else {
 			out, err := net.Dial("tcp", *dialAddr)
 			if err != nil {
