@@ -15,3 +15,10 @@ builds:
       - linux
       - darwin
       - windows
+archives:
+  - builds:
+      - ss-server
+      - ss-client
+    format_overrides:
+      - goos: windows
+        format: zip
