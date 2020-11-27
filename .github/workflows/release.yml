@@ -8,12 +8,15 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}
     steps:
       -
         name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          path: src/github.com/${{ github.repository }}
       -
         name: Set up Go
         uses: actions/setup-go@v2
@@ -22,12 +25,13 @@ jobs:
       - 
         name: Run go get
         run: |
-          go get -v -d ./...
+          go get -v -d github.com/${{ github.repository }}/...
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist
+          workdir: src/github.com/${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
