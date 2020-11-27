@@ -14,7 +14,7 @@ func ListenAndServe(addr string, handleConnection func(net.Conn)) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Println("Accept() failed.")
+			log.Println("Accept() failed:", err)
 			continue
 		}
 		go handleConnection(conn)
