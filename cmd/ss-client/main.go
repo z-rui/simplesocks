@@ -51,7 +51,7 @@ func main() {
 			log.Println("Handshake with", peer.RemoteAddr(), "failed:", err)
 			return
 		}
-		go io.Copy(peer, conn)
-		io.Copy(conn, peer)
+		go io.Copy(conn, peer)
+		io.Copy(peer, conn)
 	})
 }

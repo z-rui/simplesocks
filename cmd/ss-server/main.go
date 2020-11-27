@@ -46,8 +46,8 @@ func main() {
 				return
 			}
 			defer out.Close()
-			go io.Copy(out, in)
-			io.Copy(in, out)
+			go io.Copy(in, out)
+			io.Copy(out, in)
 		}
 	})
 }
