@@ -9,7 +9,6 @@ import (
 	"net"
 
 	"github.com/z-rui/simplesocks"
-	"github.com/z-rui/simplesocks/common"
 	"github.com/z-rui/simplesocks/x25519"
 )
 
@@ -19,35 +18,54 @@ var (
 	peerPubkeyBase64 = flag.String("k", "", "base64-encoded server public key")
 )
 
+var (
+	privateKey *x25519.PrivateKey
+	serverKey  []byte
+)
+
 func main() {
 	var err error
 	flag.Parse()
-	if *dialAddr == "" || *peerPubkeyBase64 == "" {
+	if *listenAddr == "" || *dialAddr == "" || *peerPubkeyBase64 == "" {
 		flag.Usage()
 		return
 	}
-	privateKey, err := x25519.NewPrivate(rand.Reader)
+	privateKey, err = x25519.NewPrivate(rand.Reader)
 	if err != nil {
 		log.Fatal(err)
 	}
-	serverKey, err := base64.StdEncoding.DecodeString(*peerPubkeyBase64)
+	serverKey, err = base64.StdEncoding.DecodeString(*peerPubkeyBase64)
 	if err != nil || len(serverKey) != x25519.PublicKeySize {
 		log.Fatal("bad public key")
 	}
-	common.ListenAndServe(*listenAddr, func(conn net.Conn) {
-		defer conn.Close()
-		peer, err := net.Dial("tcp", *dialAddr)
+	ln, err := net.Listen("tcp", *listenAddr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("Listening on", *listenAddr)
+	for {
+		conn, err := ln.Accept()
 		if err != nil {
-			log.Println("Dial to ", *dialAddr, " failed:", err)
-			return
+			log.Println("Accept() failed:", err)
+			continue
 		}
-		defer peer.Close()
-		peer, err = simplesocks.ClientConn(peer, privateKey, serverKey)
-		if err != nil {
-			log.Println("Handshake with", peer.RemoteAddr(), "failed:", err)
-			return
-		}
-		go io.Copy(conn, peer)
-		io.Copy(peer, conn)
-	})
+		go handleConnection(conn)
+	}
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+	peer, err := net.Dial("tcp", *dialAddr)
+	if err != nil {
+		log.Println("Dial to ", *dialAddr, " failed:", err)
+		return
+	}
+	defer peer.Close()
+	peer, err = simplesocks.ClientConn(peer, privateKey, serverKey)
+	if err != nil {
+		log.Println("Handshake with", peer.RemoteAddr(), "failed:", err)
+		return
+	}
+	go io.Copy(conn, peer)
+	io.Copy(peer, conn)
 }
