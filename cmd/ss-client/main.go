@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"flag"
 	"io"
@@ -15,13 +16,8 @@ import (
 var (
 	listenAddr       = flag.String("l", ":1080", "listening address")
 	dialAddr         = flag.String("d", "", "dial address")
-	privKeyPath      = flag.String("i", "", "private key path")
 	peerPubkeyBase64 = flag.String("k", "", "base64-encoded server public key")
 )
-
-type pubKey []byte
-
-func (pk pubKey) PublicKey() []byte { return []byte(pk) }
 
 func main() {
 	var err error
@@ -30,7 +26,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	privateKey, err := common.LoadKeyPair(*privKeyPath)
+	privateKey, err := x25519.NewPrivate(rand.Reader)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +42,7 @@ func main() {
 			return
 		}
 		defer peer.Close()
-		peer, err = simplesocks.ClientConn(peer, privateKey, pubKey(serverKey))
+		peer, err = simplesocks.ClientConn(peer, privateKey, serverKey)
 		if err != nil {
 			log.Println("Handshake with", peer.RemoteAddr(), "failed:", err)
 			return
