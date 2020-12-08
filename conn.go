@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"io"
 	"net"
+
+	"github.com/z-rui/simplesocks/x25519"
 )
 
 /* Protocol
@@ -26,23 +28,13 @@ import (
 const (
 	saltSize    = 16
 	nonceSize   = 12
-	pubkeySize  = 32
+	pubkeySize  = x25519.PublicKeySize
 	entropySize = saltSize + nonceSize*2
 	headerSize  = entropySize + pubkeySize
 )
 
-type Local interface {
-	PrivateKey() []byte
-	PublicKey() []byte
-	SharedKey(peer []byte) ([]byte, error)
-}
-
-type Remote interface {
-	PublicKey() []byte
-}
-
 // ClientConn wraps an outgoing connection to the server: handshake and encrypt all traffic
-func ClientConn(conn net.Conn, local Local, remote Remote) (net.Conn, error) {
+func ClientConn(conn net.Conn, local *x25519.PrivateKey, peer []byte) (net.Conn, error) {
 	var header [headerSize]byte
 	_, err := rand.Read(header[:entropySize])
 	if err != nil {
@@ -58,12 +50,12 @@ func ClientConn(conn net.Conn, local Local, remote Remote) (net.Conn, error) {
 	salt := header[2*nonceSize : 2*nonceSize+saltSize]
 	nonce1 := header[:nonceSize]
 	nonce2 := header[nonceSize : 2*nonceSize]
-	sharedKey, err := local.SharedKey(remote.PublicKey())
+	sharedKey, err := local.SharedKey(peer)
 	return WrapConn(conn, salt, sharedKey, nonce1, nonce2)
 }
 
 // ServerConn wraps an incoming connection from the client: handshake and encrypt all traffic
-func ServerConn(conn net.Conn, local Local) (net.Conn, error) {
+func ServerConn(conn net.Conn, local *x25519.PrivateKey) (net.Conn, error) {
 	const entropySize = nonceSize*2 + saltSize
 	var header [headerSize]byte
 	_, err := io.ReadFull(conn, header[:])
