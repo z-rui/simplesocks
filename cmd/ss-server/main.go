@@ -24,7 +24,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	privateKey, err := common.LoadKeyPair(*privKeyPath)
+	privateKey, err := LoadKeyPair(*privKeyPath)
 	if err != nil {
 		log.Fatal(err)
 	}

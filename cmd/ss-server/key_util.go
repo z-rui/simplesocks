@@ -1,4 +1,4 @@
-package common
+package main
 
 import (
 	"bytes"
@@ -15,8 +15,6 @@ import (
 	"github.com/z-rui/simplesocks/x25519"
 	"golang.org/x/term"
 )
-
-const pemPrivateKeyType = "PRIVATE KEY"
 
 func askpass(prompt string) []byte {
 	fd := int(os.Stdin.Fd())
