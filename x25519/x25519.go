@@ -62,7 +62,7 @@ func NewPrivate(rand io.Reader) (k *PrivateKey, err error) {
 }
 
 var (
-	OID             = asn1.ObjectIdentifier([]int{1, 3, 101, 110})
+	OID             = asn1.ObjectIdentifier{1, 3, 101, 110}
 	ErrBadOID       = errors.New("bad ASN.1 object identifier")
 	ErrNotFound     = errors.New("no private key found")
 	ErrSizeMismatch = errors.New("key size mismatch")
@@ -155,5 +155,6 @@ func (k *PrivateKey) EncodePEMWithPassword(rand io.Reader, password []byte, ciph
 	if err != nil {
 		return
 	}
-	return x509.EncryptPEMBlock(rand, pemPrivateKeyType, der, password, cipher)
+	block, err = x509.EncryptPEMBlock(rand, pemPrivateKeyType, der, password, cipher)
+	return
 }
