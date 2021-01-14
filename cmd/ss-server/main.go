@@ -24,6 +24,7 @@ var (
 func main() {
 	var err error
 	flag.Parse()
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	if *listenAddr == "" {
 		flag.Usage()
 		return
