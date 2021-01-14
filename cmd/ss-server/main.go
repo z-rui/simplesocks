@@ -43,6 +43,7 @@ func main() {
 			log.Println("Accept() failed:", err)
 			continue
 		}
+		conn.(*net.TCPConn).SetNoDelay(false)
 		go handleConnection(conn)
 	}
 }
