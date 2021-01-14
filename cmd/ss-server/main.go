@@ -53,7 +53,7 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	in, err := simplesocks.ServerConn(conn, privateKey)
 	if err != nil {
-		log.Println("Handshake with", conn.RemoteAddr(), "failed:", err)
+		log.Println("Handshake failed:", err)
 		return
 	}
 	if *dialAddr == "" {
@@ -63,7 +63,7 @@ func handleConnection(conn net.Conn) {
 	} else {
 		out, err := net.Dial("tcp", *dialAddr)
 		if err != nil {
-			log.Println("Dial() failed:", err)
+			log.Println(err)
 			return
 		}
 		defer out.Close()

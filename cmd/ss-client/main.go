@@ -59,13 +59,13 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	peer, err := net.Dial("tcp", *dialAddr)
 	if err != nil {
-		log.Println("Dial to ", *dialAddr, " failed:", err)
+		log.Println(err)
 		return
 	}
 	defer peer.Close()
 	peer, err = simplesocks.ClientConn(peer, privateKey, serverKey)
 	if err != nil {
-		log.Println("Handshake with", peer.RemoteAddr(), "failed:", err)
+		log.Println("Handshake failed:", err)
 		return
 	}
 	go io.Copy(conn, peer)
