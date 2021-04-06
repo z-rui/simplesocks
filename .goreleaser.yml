@@ -7,9 +7,15 @@ builds:
       - linux
       - darwin
       - windows
-
   - main: ./cmd/ss-client/
     id: "ss-client"
+    binary: ss-client
+    goos:
+      - linux
+      - darwin
+      - windows
+  - main: ./cmd/ss-client-ui
+    id: "ss-client-ui"
     binary: ss-client
     goos:
       - linux
